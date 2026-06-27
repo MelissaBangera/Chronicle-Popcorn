@@ -1,4 +1,4 @@
-# 🍿 Chronicle Popcorn
+# 🍿 [Chronicle Popcorn](https://melissabangera.github.io/Chronicle-Popcorn/chroniclepopcornhome.html)
 
 > *A Netflix-style dark-themed storytelling platform for true crime, horror, mystery, and psychological narratives.*
 
