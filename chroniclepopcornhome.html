@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chronicle Popcorn — Stories That Stay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─────────────────────────────────────────
+       RESET & BASE
+    ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0B0B0B;
+      --card:      #141414;
+      --card-hover:#1c1c1c;
+      --red:       #E50914;
+      --red-dim:   #b5070f;
+      --white:     #FFFFFF;
+      --muted:     #808080;
+      --dim:       #3a3a3a;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-serif:   'Crimson Text', serif;
+      --font-body:    'Inter', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    img { display: block; width: 100%; object-fit: cover; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+
+    /* ─────────────────────────────────────────
+       SCROLLBAR
+    ───────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
+
+    /* ─────────────────────────────────────────
+       GRAIN OVERLAY (signature element)
+    ───────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.04;
+      pointer-events: none;
+      z-index: 9999;
+      animation: grain 0.8s steps(2) infinite;
+    }
+
+    @keyframes grain {
+      0%   { transform: translate(0, 0); }
+      20%  { transform: translate(-2%, -3%); }
+      40%  { transform: translate(1%, 2%); }
+      60%  { transform: translate(-1%, 1%); }
+      80%  { transform: translate(2%, -1%); }
+      100% { transform: translate(0, 0); }
+    }
+
+    /* ─────────────────────────────────────────
+       NAVBAR
+    ───────────────────────────────────────── */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      padding: 0 5%;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: transparent;
+      transition: background 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .navbar.scrolled {
+      background: #000000ee;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-display);
+      font-size: 1.45rem;
+      letter-spacing: 0.08em;
+      color: var(--white);
+    }
+
+    .nav-logo span.popcorn-icon { font-size: 1.3rem; }
+    .nav-logo span.logo-red { color: var(--red); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: #ccc;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0;
+      width: 0; height: 1px;
+      background: var(--red);
+      transition: width 0.25s ease;
+    }
+
+    .nav-links a:hover { color: var(--white); }
+    .nav-links a:hover::after { width: 100%; }
+
+    .nav-search {
+      background: none;
+      color: var(--muted);
+      font-size: 1rem;
+      transition: color 0.2s;
+    }
+    .nav-search:hover { color: var(--white); }
+
+    /* ─────────────────────────────────────────
+       HERO
+    ───────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to top, var(--bg) 0%, transparent 55%),
+        linear-gradient(to right, rgba(0,0,0,0.85) 30%, transparent 75%),
+        url('https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1600&auto=format&fit=crop&q=80') center/cover no-repeat;
+      transform: scale(1.04);
+      animation: heroZoom 20s ease-in-out infinite alternate;
+    }
+
+    @keyframes heroZoom {
+      from { transform: scale(1.04); }
+      to   { transform: scale(1.10); }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      padding: 0 6%;
+      max-width: 720px;
+    }
+
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .hero-eyebrow-line {
+      width: 32px; height: 2px;
+      background: var(--red);
+    }
+
+    .hero-eyebrow span {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--red);
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(3.5rem, 8vw, 7rem);
+      line-height: 0.95;
+      letter-spacing: 0.03em;
+      color: var(--white);
+      margin-bottom: 20px;
+    }
+
+    .hero-title span.hero-title-italic {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 400;
+      color: #ddd;
+    }
+
+    .hero-sub {
+      font-family: var(--font-serif);
+      font-size: 1.2rem;
+      font-style: italic;
+      color: #bbb;
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+
+    .hero-sub span {
+      display: block;
+    }
+
+    .hero-buttons {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 28px;
+      background: var(--white);
+      color: #000;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      border-radius: 4px;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .btn-primary:hover { background: #e0e0e0; transform: translateY(-1px); }
+
+    .btn-secondary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 28px;
+      background: rgba(255,255,255,0.12);
+      color: var(--white);
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.18);
+      backdrop-filter: blur(4px);
+      transition: background 0.2s, transform 0.2s;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(229,9,20,0.15);
+      border: 1px solid rgba(229,9,20,0.35);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #ff6b72;
+      letter-spacing: 0.05em;
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      z-index: 3;
+      animation: bounceDown 2s ease-in-out infinite;
+    }
+
+    .hero-scroll span {
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 36px;
+      background: linear-gradient(to bottom, var(--muted), transparent);
+    }
+
+    @keyframes bounceDown {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%       { transform: translateX(-50%) translateY(6px); }
+    }
+
+    /* ─────────────────────────────────────────
+       SECTION COMMONS
+    ───────────────────────────────────────── */
+    .section { padding: 70px 5%; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 1.55rem;
+      letter-spacing: 0.06em;
+      color: var(--white);
+    }
+
+    .section-icon {
+      font-size: 1.1rem;
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--dim), transparent);
+    }
+
+    .section-count {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    /* ─────────────────────────────────────────
+       HORIZONTAL SCROLL ROW
+    ───────────────────────────────────────── */
+    .stories-row {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding-bottom: 16px;
+      scroll-snap-type: x mandatory;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .stories-row::-webkit-scrollbar { display: none; }
+
+    /* ─────────────────────────────────────────
+       STORY CARD
+    ───────────────────────────────────────── */
+    .story-card {
+      position: relative;
+      min-width: 200px;
+      width: 200px;
+      height: 300px;
+      border-radius: 6px;
+      overflow: hidden;
+      flex-shrink: 0;
+      scroll-snap-align: start;
+      cursor: pointer;
+      transition: transform 0.3s cubic-bezier(.25,.46,.45,.94), box-shadow 0.3s;
+      background: var(--card);
+    }
+
+    .story-card:hover {
+      transform: scale(1.06) translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
+      z-index: 10;
+    }
+
+    .story-card img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .story-card:hover img { transform: scale(1.04); }
+
+    .card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.1) 55%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .story-card:hover .card-overlay { opacity: 1; }
+
+    .card-info {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 16px 14px;
+      transform: translateY(8px);
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .story-card:hover .card-info { transform: translateY(0); opacity: 1; }
+
+    .card-tag {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 4px;
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+      color: var(--white);
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .card-meta {
+      font-size: 0.7rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-dot {
+      width: 3px; height: 3px;
+      border-radius: 50%;
+      background: var(--dim);
+      display: inline-block;
+    }
+
+    .card-play {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.7);
+      opacity: 0;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      color: #000;
+      transition: all 0.3s ease;
+    }
+
+    .story-card:hover .card-play {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    /* Rank badge for trending */
+    .rank-badge {
+      position: absolute;
+      top: 10px; left: 10px;
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      color: var(--white);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+
+    /* ─────────────────────────────────────────
+       FEATURED BANNER
+    ───────────────────────────────────────── */
+    .featured-banner {
+      position: relative;
+      margin: 0 5%;
+      border-radius: 12px;
+      overflow: hidden;
+      min-height: 500px;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .featured-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to right, rgba(0,0,0,0.9) 35%, rgba(0,0,0,0.2) 80%),
+        linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%),
+        url('https://images.unsplash.com/photo-1534759926678-2c65b8a11b7e?w=1400&auto=format&fit=crop&q=80') center/cover no-repeat;
+    }
+
+    .featured-content {
+      position: relative;
+      z-index: 2;
+      padding: 56px 52px;
+      max-width: 560px;
+    }
+
+    .featured-eyebrow {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .featured-eyebrow::before {
+      content: '';
+      display: block;
+      width: 24px; height: 2px;
+      background: var(--red);
+    }
+
+    .featured-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      letter-spacing: 0.04em;
+      line-height: 1;
+      color: var(--white);
+      margin-bottom: 18px;
+    }
+
+    .featured-desc {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      color: #bbb;
+      line-height: 1.8;
+      font-style: italic;
+      margin-bottom: 32px;
+      border-left: 2px solid var(--red);
+      padding-left: 16px;
+    }
+
+    .featured-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* ─────────────────────────────────────────
+       NEW RELEASES GRID
+    ───────────────────────────────────────── */
+    .releases-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .release-card {
+      position: relative;
+      border-radius: 6px;
+      overflow: hidden;
+      aspect-ratio: 2/3;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s;
+      background: var(--card);
+    }
+
+    .release-card:hover {
+      transform: scale(1.04) translateY(-4px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+      z-index: 5;
+    }
+
+    .release-card img { width: 100%; height: 100%; object-fit: cover; }
+
+    .new-badge {
+      position: absolute;
+      top: 10px; right: 10px;
+      background: var(--red);
+      color: var(--white);
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 7px;
+      border-radius: 2px;
+    }
+
+    .release-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 55%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .release-card:hover .release-overlay { opacity: 1; }
+
+    .release-info {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 14px 12px;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: all 0.3s;
+    }
+
+    .release-card:hover .release-info { opacity: 1; transform: translateY(0); }
+
+    .release-title {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+      color: var(--white);
+    }
+
+    .release-genre {
+      font-size: 0.65rem;
+      color: var(--red);
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* ─────────────────────────────────────────
+       ABOUT SECTION
+    ───────────────────────────────────────── */
+    .about-section {
+      padding: 90px 5%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      border-top: 1px solid var(--dim);
+      border-bottom: 1px solid var(--dim);
+    }
+
+    .about-left .about-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 20px;
+    }
+
+    .about-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 4.5vw, 3.8rem);
+      letter-spacing: 0.04em;
+      line-height: 1;
+      color: var(--white);
+      margin-bottom: 24px;
+    }
+
+    .about-body {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      color: #aaa;
+      line-height: 1.85;
+      font-style: italic;
+      margin-bottom: 32px;
+    }
+
+    .about-stats {
+      display: flex;
+      gap: 40px;
+    }
+
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      color: var(--red);
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .about-right {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .about-img-card {
+      border-radius: 6px;
+      overflow: hidden;
+      aspect-ratio: 3/4;
+      background: var(--card);
+    }
+
+    .about-img-card:first-child {
+      grid-row: span 2;
+      aspect-ratio: unset;
+    }
+
+    .about-img-card img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ─────────────────────────────────────────
+       FOOTER
+    ───────────────────────────────────────── */
+    .footer {
+      padding: 56px 5% 36px;
+      background: #050505;
+    }
+
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+
+    .footer-brand .footer-logo {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+      color: var(--white);
+    }
+
+    .footer-brand .footer-logo span { color: var(--red); }
+
+    .footer-brand p {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 280px;
+    }
+
+    .footer-col h4 {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 16px;
+    }
+
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 10px; }
+    .footer-col ul li a {
+      font-size: 0.82rem;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+    .footer-col ul li a:hover { color: var(--white); }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--dim);
+      padding-top: 24px;
+    }
+
+    .footer-bottom p {
+      font-size: 0.75rem;
+      color: var(--dim);
+    }
+
+    .footer-bottom p span { color: var(--red); }
+
+    .footer-social {
+      display: flex;
+      gap: 16px;
+    }
+
+    .footer-social a {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--dim);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .footer-social a:hover {
+      border-color: var(--red);
+      color: var(--white);
+    }
+
+    /* ─────────────────────────────────────────
+       SCROLL REVEAL
+    ───────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* ─────────────────────────────────────────
+       SECTION DIVIDER
+    ───────────────────────────────────────── */
+    .section-divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--dim), transparent);
+      margin: 0 5%;
+      width: 90%;
+    }
+
+    /* ─────────────────────────────────────────
+       TOAST / MODAL STUB
+    ───────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--white);
+      padding: 14px 22px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      z-index: 5000;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.35s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-icon { color: var(--red); font-size: 1rem; }
+
+    /* ─────────────────────────────────────────
+       RESPONSIVE
+    ───────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .about-section {
+        grid-template-columns: 1fr;
+        gap: 48px;
+      }
+      .about-right { display: none; }
+      .footer-top {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .hero-title { font-size: 3rem; }
+      .hero-sub { font-size: 1rem; }
+      .featured-banner { min-height: 380px; }
+      .featured-content { padding: 32px 28px; }
+      .featured-title { font-size: 2rem; }
+      .footer-top { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; gap: 16px; }
+      .story-card { min-width: 155px; width: 155px; height: 240px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── NAVBAR ─────────────────────────────── -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-logo">
+      <span class="popcorn-icon">🍿</span>
+      Chronicle<span class="logo-red">Popcorn</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Stories</a></li>
+      <li><a href="#">True Crime</a></li>
+      <li><a href="#">Horror</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+    <button class="nav-search" aria-label="Search" onclick="showToast('🔍 Search coming soon...')">&#x2315;</button>
+  </nav>
+
+  <!-- ── HERO ───────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <div class="hero-eyebrow-line"></div>
+        <span>Now Reading</span>
+      </div>
+      <h1 class="hero-title">
+        THE STORIES<br>
+        YOU <span class="hero-title-italic">can't</span><br>
+        FORGET
+      </h1>
+      <p class="hero-sub">
+        <span>True crime.</span>
+        <span>Psychological mysteries.</span>
+        <span>Stories that stay with you.</span>
+      </p>
+      <div class="hero-buttons">
+        <button class="btn-primary" onclick="showToast('📖 Opening latest story...')">
+          &#9654; Start Reading
+        </button>
+        <button class="btn-secondary" onclick="showToast('📚 Loading collection...')">
+          &#9432; Browse Collection
+        </button>
+      </div>
+      <div class="hero-badge">
+        🔥 120+ Stories Available
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ── TRENDING STORIES ───────────────────── -->
+  <section class="section reveal" id="trending">
+    <div class="section-header">
+      <span class="section-icon">📈</span>
+      <h2 class="section-title">TRENDING NOW</h2>
+      <div class="section-line"></div>
+      <span class="section-count">Top 10 This Week</span>
+    </div>
+
+    <div class="stories-row">
+      <!-- Cards generated by JS -->
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ── TRUE CRIME ─────────────────────────── -->
+  <section class="section reveal reveal-delay-1" id="truecrime">
+    <div class="section-header">
+      <span class="section-icon">🔪</span>
+      <h2 class="section-title">TRUE CRIME</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="stories-row" id="trueCrimeRow"></div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ── HORROR ─────────────────────────────── -->
+  <section class="section reveal" id="horror">
+    <div class="section-header">
+      <span class="section-icon">👻</span>
+      <h2 class="section-title">HORROR</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="stories-row" id="horrorRow"></div>
+  </section>
+
+  <!-- ── FEATURED BANNER ────────────────────── -->
+  <section style="padding: 20px 0 70px; background: var(--bg);" class="reveal">
+    <div class="featured-banner">
+      <div class="featured-bg"></div>
+      <div class="featured-content">
+        <div class="featured-eyebrow">Featured Story</div>
+        <h2 class="featured-title">THE LAST<br>PHONE CALL</h2>
+        <p class="featured-desc">
+          A voicemail received at 2:13 AM would become
+          the final clue in a case that remained
+          unsolved for years.
+        </p>
+        <div class="featured-buttons">
+          <button class="btn-primary" onclick="showToast('📱 Opening: The Last Phone Call...')">
+            &#9654; Read Story
+          </button>
+          <button class="btn-secondary" onclick="showToast('🔖 Saved for later!')">
+            &#9825; Save For Later
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── NEW RELEASES ───────────────────────── -->
+  <section class="section reveal" id="newreleases">
+    <div class="section-header">
+      <span class="section-icon">✦</span>
+      <h2 class="section-title">NEW THIS WEEK</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="releases-grid" id="newReleasesGrid"></div>
+  </section>
+
+  <!-- ── ABOUT ──────────────────────────────── -->
+  <div class="about-section reveal">
+    <div class="about-left">
+      <div class="about-label">Our Mission</div>
+      <h2 class="about-title">STORIES<br>WORTH<br>TELLING</h2>
+      <p class="about-body">
+        Chronicle Popcorn is a storytelling platform
+        dedicated to true crime, mystery, horror,
+        and unforgettable narratives — the kind that
+        linger long after you've closed the page.
+      </p>
+      <div class="about-stats">
+        <div>
+          <div class="stat-num">120+</div>
+          <div class="stat-label">Stories</div>
+        </div>
+        <div>
+          <div class="stat-num">8</div>
+          <div class="stat-label">Genres</div>
+        </div>
+        <div>
+          <div class="stat-num">50K</div>
+          <div class="stat-label">Readers</div>
+        </div>
+      </div>
+    </div>
+    <div class="about-right">
+      <div class="about-img-card">
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80" alt="Story" loading="lazy" />
+      </div>
+      <div class="about-img-card">
+        <img src="https://images.unsplash.com/photo-1509721434272-b79147e0e708?w=400&auto=format&fit=crop&q=80" alt="Mystery" loading="lazy" />
+      </div>
+      <div class="about-img-card">
+        <img src="https://images.unsplash.com/photo-1518791841217-8f162f1912da?w=400&auto=format&fit=crop&q=80" alt="Horror" loading="lazy" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ─────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">🍿 Chronicle<span>Popcorn</span></div>
+        <p>Dedicated to true crime, mystery, horror, and the stories that never let go.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Discover</h4>
+        <ul>
+          <li><a href="#">True Crime</a></li>
+          <li><a href="#">Horror</a></li>
+          <li><a href="#">Mystery</a></li>
+          <li><a href="#">Psychological</a></li>
+          <li><a href="#">Unsolved Cases</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <ul>
+          <li><a href="#">How it Works</a></li>
+          <li><a href="#">New Releases</a></li>
+          <li><a href="#">Collections</a></li>
+          <li><a href="#">Reading Lists</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Write For Us</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Use</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 <span>Chronicle Popcorn</span>. All rights reserved. Made with 🍿</p>
+      <div class="footer-social">
+        <a href="#" title="Twitter">&#x1D54F;</a>
+        <a href="#" title="Instagram">&#9632;</a>
+        <a href="#" title="Reddit">&#9675;</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast">
+    <span class="toast-icon">✦</span>
+    <span id="toastMsg"></span>
+  </div>
+
+  <!-- ── JAVASCRIPT ──────────────────────────── -->
+  <script>
+    /* ── DATA ───────────────────────────────────────── */
+    const TRENDING = [
+      { title: "The Vanishing Hour", tag: "True Crime", year: "2024", mins: "18 min read", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&auto=format&fit=crop&q=80" },
+      { title: "Room 214", tag: "Mystery", year: "2024", mins: "22 min read", img: "https://images.unsplash.com/photo-1562240020-ce31ccb0fa7d?w=300&auto=format&fit=crop&q=80" },
+      { title: "The Blackout Files", tag: "Horror", year: "2024", mins: "15 min read", img: "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?w=300&auto=format&fit=crop&q=80" },
+      { title: "The Last Witness", tag: "True Crime", year: "2023", mins: "30 min read", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80" },
+      { title: "Silence at Midnight", tag: "Psychological", year: "2024", mins: "25 min read", img: "https://images.unsplash.com/photo-1509721434272-b79147e0e708?w=300&auto=format&fit=crop&q=80" },
+      { title: "The Empty Chair", tag: "Mystery", year: "2024", mins: "20 min read", img: "https://images.unsplash.com/photo-1470217957101-da7150b9b681?w=300&auto=format&fit=crop&q=80" },
+      { title: "Fog On Route 9", tag: "Horror", year: "2023", mins: "17 min read", img: "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=300&auto=format&fit=crop&q=80" },
+    ];
+
+    const TRUE_CRIME = [
+      { title: "The Missing Student", tag: "True Crime", year: "2024", mins: "28 min read", img: "https://images.unsplash.com/photo-1523821741446-edb2b68bb7a0?w=300&auto=format&fit=crop&q=80" },
+      { title: "The Locked Apartment", tag: "True Crime", year: "2024", mins: "19 min read", img: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&auto=format&fit=crop&q=80" },
+      { title: "The Last Phone Call", tag: "True Crime", year: "2024", mins: "22 min read", img: "https://images.unsplash.com/photo-1534759926678-2c65b8a11b7e?w=300&auto=format&fit=crop&q=80" },
+      { title: "Seven Days Silent", tag: "True Crime", year: "2023", mins: "35 min read", img: "https://images.unsplash.com/photo-1496368077930-c1e31b4e5b44?w=300&auto=format&fit=crop&q=80" },
+      { title: "The Alibi", tag: "True Crime", year: "2024", mins: "14 min read", img: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=300&auto=format&fit=crop&q=80" },
+      { title: "Cold Case #47", tag: "True Crime", year: "2023", mins: "40 min read", img: "https://images.unsplash.com/photo-1485738422979-f5c462d49f74?w=300&auto=format&fit=crop&q=80" },
+    ];
+
+    const HORROR = [
+      { title: "The Third Knock", tag: "Horror", year: "2024", mins: "16 min read", img: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?w=300&auto=format&fit=crop&q=80" },
+      { title: "Something In The Walls", tag: "Horror", year: "2024", mins: "21 min read", img: "https://images.unsplash.com/photo-1467541473380-93e56d5ca67e?w=300&auto=format&fit=crop&q=80" },
+      { title: "Don't Look Back", tag: "Horror", year: "2024", mins: "18 min read", img: "https://images.unsplash.com/photo-1518791841217-8f162f1912da?w=300&auto=format&fit=crop&q=80" },
+      { title: "The Inheritance", tag: "Horror", year: "2023", mins: "29 min read", img: "https://images.unsplash.com/photo-1560719887-fe3105fa1e55?w=300&auto=format&fit=crop&q=80" },
+      { title: "Midnight Caller", tag: "Horror", year: "2024", mins: "13 min read", img: "https://images.unsplash.com/photo-1580893246395-52aead8960dc?w=300&auto=format&fit=crop&q=80" },
+      { title: "The Visitor", tag: "Horror", year: "2024", mins: "24 min read", img: "https://images.unsplash.com/photo-1535350356005-fd52b3b524fb?w=300&auto=format&fit=crop&q=80" },
+    ];
+
+    const NEW_RELEASES = [
+      { title: "The Quiet Street", genre: "Mystery", img: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=300&auto=format&fit=crop&q=80" },
+      { title: "Unconfirmed", genre: "True Crime", img: "https://images.unsplash.com/photo-1553697388-94e804e2f0f6?w=300&auto=format&fit=crop&q=80" },
+      { title: "After Dark", genre: "Horror", img: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=300&auto=format&fit=crop&q=80" },
+      { title: "The Other Side", genre: "Psychological", img: "https://images.unsplash.com/photo-1498551172505-8ee7ad69f235?w=300&auto=format&fit=crop&q=80" },
+      { title: "Case Zero", genre: "True Crime", img: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300&auto=format&fit=crop&q=80" },
+      { title: "Hollow Ground", genre: "Horror", img: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=300&auto=format&fit=crop&q=80" },
+      { title: "The Signal", genre: "Mystery", img: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=300&auto=format&fit=crop&q=80" },
+      { title: "Behind The Door", genre: "Horror", img: "https://images.unsplash.com/photo-1519176336747-37dc0a540772?w=300&auto=format&fit=crop&q=80" },
+    ];
+
+    /* ── CARD BUILDERS ─────────────────────────────── */
+    function buildStoryCard(story, rank = null) {
+      return `
+        <div class="story-card" onclick="showToast('📖 Opening: ${story.title}...')">
+          <img src="${story.img}" alt="${story.title}" loading="lazy" />
+          ${rank ? `<div class="rank-badge">${rank}</div>` : ''}
+          <div class="card-play">&#9654;</div>
+          <div class="card-overlay"></div>
+          <div class="card-info">
+            <div class="card-tag">${story.tag}</div>
+            <div class="card-title">${story.title}</div>
+            <div class="card-meta">
+              <span>${story.year}</span>
+              <span class="card-dot"></span>
+              <span>${story.mins}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function buildReleaseCard(story) {
+      return `
+        <div class="release-card" onclick="showToast('📖 Opening: ${story.title}...')">
+          <img src="${story.img}" alt="${story.title}" loading="lazy" />
+          <div class="new-badge">NEW</div>
+          <div class="release-overlay"></div>
+          <div class="release-info">
+            <div class="release-genre">${story.genre}</div>
+            <div class="release-title">${story.title}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    /* ── POPULATE ROWS ─────────────────────────────── */
+    function populateRow(containerId, data, ranked = false) {
+      const el = document.querySelector(`#${containerId} .stories-row`) ||
+                 document.getElementById(containerId);
+      if (!el) return;
+      el.innerHTML = data.map((s, i) =>
+        buildStoryCard(s, ranked ? (i + 1) : null)
+      ).join('');
+    }
+
+    // Trending row is inside section#trending
+    document.querySelector('#trending .stories-row').innerHTML =
+      TRENDING.map((s, i) => buildStoryCard(s, i + 1)).join('');
+
+    document.getElementById('trueCrimeRow').innerHTML =
+      TRUE_CRIME.map(s => buildStoryCard(s)).join('');
+
+    document.getElementById('horrorRow').innerHTML =
+      HORROR.map(s => buildStoryCard(s)).join('');
+
+    document.getElementById('newReleasesGrid').innerHTML =
+      NEW_RELEASES.map(s => buildReleaseCard(s)).join('');
+
+    /* ── NAVBAR SCROLL ─────────────────────────────── */
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 60);
+    }, { passive: true });
+
+    /* ── HERO PARALLAX ─────────────────────────────── */
+    const heroBg = document.getElementById('heroBg');
+    window.addEventListener('scroll', () => {
+      const scrolled = window.scrollY;
+      if (scrolled < window.innerHeight) {
+        heroBg.style.transform = `translateY(${scrolled * 0.3}px) scale(1.08)`;
+      }
+    }, { passive: true });
+
+    /* ── SCROLL REVEAL ─────────────────────────────── */
+    const revealEls = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+
+    revealEls.forEach(el => observer.observe(el));
+
+    /* ── TOAST ─────────────────────────────────────── */
+    let toastTimer;
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const msgEl = document.getElementById('toastMsg');
+      clearTimeout(toastTimer);
+      msgEl.textContent = msg;
+      toast.classList.add('show');
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+  </script>
+
+</body>
+</html>
